@@ -43,8 +43,54 @@ def crear_tablas():
                 fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        
+        # Crear tabla productos
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS productos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT UNIQUE NOT NULL,
+                tipo TEXT NOT NULL,
+                capacidad TEXT NOT NULL,
+                precio REAL NOT NULL,
+                activo BOOLEAN DEFAULT 1,
+                fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
         conexion.commit()
         conexion.close()
+
+def insertar_productos_iniciales():
+    """Inserta los productos de gas licuado con precios iniciales"""
+    conexion = conectar()
+    if conexion:
+        try:
+            cursor = conexion.cursor()
+            
+            # Lista de productos de gas licuado
+            productos = [
+                ("Galón 5kg", "Gas Licuado", "5kg", 8500),
+                ("Galón 11kg", "Gas Licuado", "11kg", 15000),
+                ("Galón 15kg", "Gas Licuado", "15kg", 22000),
+                ("Galón 30kg", "Gas Licuado", "30kg", 35000),
+                ("Galón 45kg", "Gas Licuado", "45kg", 48000)
+            ]
+            
+            # Insertar cada producto si no existe
+            for nombre, tipo, capacidad, precio in productos:
+                cursor.execute("SELECT id FROM productos WHERE nombre = ?", (nombre,))
+                if not cursor.fetchone():
+                    cursor.execute(
+                        "INSERT INTO productos (nombre, tipo, capacidad, precio) VALUES (?, ?, ?, ?)",
+                        (nombre, tipo, capacidad, precio)
+                    )
+            
+            conexion.commit()
+            print("Productos de gas licuado insertados correctamente")
+            
+        except Exception as e:
+            print(f"Error al insertar productos: {e}")
+        finally:
+            conexion.close()
 
 def cerrar_conexion(conexion):
     """Cierra la conexión a la base de datos"""
@@ -56,6 +102,7 @@ def cerrar_conexion(conexion):
 def inicializar_base_de_datos():
     """Inicializa la base de datos y crea un usuario admin por defecto"""
     crear_tablas()
+    insertar_productos_iniciales()  # Agregar productos
     
     # Crear usuario admin por defecto
     conexion = conectar()
