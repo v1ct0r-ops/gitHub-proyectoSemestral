@@ -3,9 +3,11 @@ from tkinter import messagebox
 from database.database import conectar
 
 class MenuApp:
-    def __init__(self, master, usuario):
+    def __init__(self, master, usuario, callback_crear_orden=None, callback_cerrar_sesion=None):
         self.master = master
         self.usuario = usuario
+        self.callback_crear_orden = callback_crear_orden  # Guardar callback para crear orden
+        self.callback_cerrar_sesion = callback_cerrar_sesion  # Guardar callback para cerrar sesión
         master.title("Menú Principal")
         master.geometry("400x300")
         self.crear_interfaz()
@@ -17,14 +19,18 @@ class MenuApp:
         tk.Button(self.master, text="Cerrar sesión", width=25, command=self.cerrar_sesion).pack(pady=10)
 
     def crear_orden(self):
-        messagebox.showinfo("Función", "Aquí se abriría el formulario de nueva orden.")
-        # Aquí se debe integrar con OrdenCompraApp
+        """Ejecutar callback para crear orden o mostrar mensaje por defecto"""
+        if self.callback_crear_orden:
+            self.callback_crear_orden()  # Llamar al callback de app.py
+        else:
+            messagebox.showinfo("Función", "Aquí se abriría el formulario de nueva orden.")
+            # Modo independiente (sin integración)
 
     def listar_ordenes(self):
         conexion = conectar()
         if conexion:
             cursor = conexion.cursor()
-            cursor.execute("SELECT numero_orden, cliente, total, fecha_creacion FROM ordenes_compra ORDER BY fecha_creacion DESC")
+            cursor.execute("SELECT numero_orden, cliente, precios, fecha_creacion FROM ordenes_compra ORDER BY fecha_creacion DESC")
             ordenes = cursor.fetchall()
             conexion.close()
             if ordenes:
@@ -36,8 +42,11 @@ class MenuApp:
             messagebox.showerror("Error", "No se pudo conectar a la base de datos.")
 
     def cerrar_sesion(self):
-        self.master.destroy()
-        # Aquí se debe regresar al login
+        """Ejecutar callback para cerrar sesión o cerrar ventana por defecto"""
+        if self.callback_cerrar_sesion:
+            self.callback_cerrar_sesion()  # Llamar al callback de app.py
+        else:
+            self.master.destroy()  # Modo independiente
 
 if __name__ == "__main__":
     root = tk.Tk()

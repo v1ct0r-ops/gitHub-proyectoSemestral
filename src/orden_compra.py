@@ -9,8 +9,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database.database import conectar
 
 class OrdenCompraApp:
-    def __init__(self,root):
+    def __init__(self, root, callback_orden_guardada=None, callback_volver_menu=None):
         self.root = root
+        self.callback_orden_guardada = callback_orden_guardada  # Callback para orden guardada
+        self.callback_volver_menu = callback_volver_menu  # Callback para volver al menú
         self.root.title("Sistema gas Licuado - Orden de Compra")
         self.root.geometry("600x700")
         
@@ -142,8 +144,8 @@ class OrdenCompraApp:
         # Botón Ver Órdenes Guardadas
         ttk.Button(botones_frame, text="Ver Órdenes Guardadas", command=self.ver_ordenes).pack(side=tk.LEFT, padx=(0, 10))
         
-        # Botón Cancelar
-        ttk.Button(botones_frame, text="Cancelar", command=self.root.destroy).pack(side=tk.RIGHT)
+        # Botón Volver al menú
+        ttk.Button(botones_frame, text="Volver al menú", command=self.volver_menu).pack(side=tk.RIGHT)
         
         # Aquí agregaremos todos los campos
         print("Productos cargados:", self.productos)
@@ -230,6 +232,10 @@ class OrdenCompraApp:
                 messagebox.showinfo("Éxito", f"Orden guardada correctamente\nTotal: ${total_orden:,}")
                 self.limpiar_formulario()
                 
+                # Si hay callback, ejecutarlo (volver al menú)
+                if self.callback_orden_guardada:
+                    self.callback_orden_guardada()
+                
             except Exception as e:
                 messagebox.showerror("Error", f"Error al guardar: {e}")
                 conexion.close()
@@ -249,6 +255,13 @@ class OrdenCompraApp:
         # Limpiar cantidades
         for cantidad_var in self.cantidades.values():
             cantidad_var.set("0")
+    
+    def volver_menu(self):
+        """Vuelve al menú principal usando callback"""
+        if self.callback_volver_menu:
+            self.callback_volver_menu()  # Usar callback de app.py
+        else:
+            self.root.destroy()  # Modo independiente (solo cerrar ventana)
     
     def ver_ordenes(self):
         """Muestra una ventana con todas las órdenes guardadas"""
