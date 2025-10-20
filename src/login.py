@@ -8,8 +8,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database.database import conectar
 
 class LoginApp:
-    def __init__(self, root):
+    def __init__(self, root, callback_login_exitoso=None):
         self.root = root
+        self.callback_login_exitoso = callback_login_exitoso  # Guardar el callback
         self.root.title("Login")
         self.root.geometry("300x200")
         
@@ -53,8 +54,13 @@ class LoginApp:
                 
                 if result[0] == password_hash:
                     messagebox.showinfo("Success", "Login successful!")
-                    self.root.destroy()  # cierro ventana de inicio de sesion
-                    # Aquí podría abrir la ventana principal de la aplicación
+                    
+                    # Si hay callback, llamarlo con el usuario
+                    if self.callback_login_exitoso:
+                        self.callback_login_exitoso(username)
+                    else:
+                        # Si no hay callback, cerrar ventana (modo independiente)
+                        self.root.destroy()
                 else:
                     messagebox.showerror("Error", "usuario o contraseña invalida.")
             else:
