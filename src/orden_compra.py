@@ -39,7 +39,7 @@ class OrdenCompraApp:
         return {}
     
     def crear_interfaz(self):
-        """Crea todos los elementos de la interfaz"""
+        """Creo todos los elementos de la interfaz"""
         # Frame principal con scroll
         main_frame = ttk.Frame(self.root, padding="10")
         main_frame.pack(fill=tk.BOTH, expand=True)
@@ -99,6 +99,7 @@ class OrdenCompraApp:
         # Crear campos para cada producto
         self.cantidades = {}
         self.subtotales = {}
+        self.precios_vars = {}   # sera mi nuevo diccionario para precios editables del admin
         row = 1
         
         for producto, precio in self.productos.items():
@@ -106,7 +107,9 @@ class OrdenCompraApp:
             ttk.Label(productos_frame, text=producto).grid(row=row, column=0, sticky=tk.W, pady=2)
             
             # Precio
-            ttk.Label(productos_frame, text=f"${precio:,}").grid(row=row, column=1, pady=2)
+            self.precios_vars[producto] = tk.StringVar(value=str(precio))
+            precio_entry = ttk.Entry(productos_frame, textvariable=self.precios_vars[producto], width=10)
+            precio_entry.grid(row=row, column=1, padx=10, pady=2)
             
             # Cantidad
             self.cantidades[producto] = tk.StringVar(value="0")
@@ -129,6 +132,13 @@ class OrdenCompraApp:
         ttk.Label(total_frame, text="TOTAL GENERAL:", font=("Arial", 12, "bold")).pack(side=tk.LEFT)
         self.total_general = tk.StringVar(value="$0")
         ttk.Label(total_frame, textvariable=self.total_general, font=("Arial", 12, "bold"), foreground="blue").pack(side=tk.LEFT, padx=(10, 0))
+
+        # Botón para restablecer precios base
+        ttk.Button(productos_frame, text="Restablecer precios base", 
+                command=self.reestablecer_precios_base).grid(
+            row=row+1, column=0, columnspan=4, pady=(10, 5)
+        )
+
         
         # === SECCIÓN 4: BOTONES DE ACCIÓN ===
         botones_frame = ttk.Frame(main_frame)
@@ -149,14 +159,21 @@ class OrdenCompraApp:
         
         # Aquí agregaremos todos los campos
         print("Productos cargados:", self.productos)
+
+
+    def reestablecer_precios_base(self):
+        """Restaura los precios originales desde la base de datos"""
+        for producto, precio in self.productos.items():
+            self.precios_vars[producto].set(str(precio))
+
     
     def calcular_subtotal(self, producto):
-        """Calcula el subtotal cuando cambia la cantidad"""
+        """Calcula el subtotal cuando cambia la cantidad o precio"""
         try:
             cantidad = int(self.cantidades[producto].get() or 0)
-            precio = self.productos[producto]
+            precio = float(self.precios_vars[producto].get() or 0)
             subtotal = cantidad * precio
-            self.subtotales[producto].set(f"${subtotal:,}")
+            self.subtotales[producto].set(f"${subtotal:,.0f}")
             self.calcular_total_general()
         except ValueError:
             self.subtotales[producto].set("$0")
@@ -168,11 +185,11 @@ class OrdenCompraApp:
         for producto in self.productos:
             try:
                 cantidad = int(self.cantidades[producto].get() or 0)
-                precio = self.productos[producto]
+                precio = float(self.precios_vars[producto].get() or 0)
                 total += cantidad * precio
             except ValueError:
                 pass
-        self.total_general.set(f"${total:,}")
+        self.total_general.set(f"${total:,.0f}")
     
     def guardar_orden(self):
         """Guarda la orden en la base de datos"""
@@ -197,7 +214,7 @@ class OrdenCompraApp:
             try:
                 cantidad = int(cantidad_var.get() or 0)
                 if cantidad > 0:
-                    precio = self.productos[producto]
+                    precio = float(self.precios_vars[producto].get() or 0)
                     productos_seleccionados.append(f"{producto}: {cantidad} unidades")
                     total_orden += cantidad * precio
             except ValueError:

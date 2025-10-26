@@ -25,7 +25,7 @@ class SistemaGestionOrdenes:
         
     def mostrar_login(self):
         """Muestra la ventana de login"""
-        print("🔐 Mostrando ventana de login...")
+        print(" Mostrando ventana de login...")
         from src.login import LoginApp
         
         # Crear ventana para el login
@@ -51,7 +51,7 @@ class SistemaGestionOrdenes:
         
     def mostrar_menu(self):
         """Muestra el menú principal"""
-        print(f"📋 Abriendo menú para {self.usuario_logueado}...")
+        print(f" Abriendo menú para {self.usuario_logueado}...")
         from src.menu import MenuApp
         
         # Crear ventana para el menú
@@ -71,7 +71,7 @@ class SistemaGestionOrdenes:
         
     def on_crear_orden(self):
         """Callback cuando el usuario quiere crear una orden"""
-        print("📝 Usuario quiere crear nueva orden...")
+        print(" Usuario quiere crear nueva orden...")
         
         # Cerrar ventana del menú
         self.ventana_actual.destroy()
@@ -81,7 +81,7 @@ class SistemaGestionOrdenes:
         
     def on_cerrar_sesion(self):
         """Callback cuando el usuario quiere cerrar sesión"""
-        print("👋 Usuario quiere cerrar sesión...")
+        print(" Usuario quiere cerrar sesión...")
         
         # Cerrar ventana del menú
         self.ventana_actual.destroy()
@@ -94,7 +94,7 @@ class SistemaGestionOrdenes:
         
     def mostrar_formulario_orden(self):
         """Muestra el formulario de nueva orden"""
-        print("📋 Abriendo formulario de orden...")
+        print(" Abriendo formulario de orden...")
         from src.orden_compra import OrdenCompraApp
         
         # Crear ventana para el formulario
@@ -113,7 +113,7 @@ class SistemaGestionOrdenes:
         
     def on_orden_guardada(self):
         """Callback cuando se guarda una orden exitosamente"""
-        print("✅ Orden guardada exitosamente, volviendo al menú...")
+        print(" Orden guardada exitosamente, volviendo al menú...")
         
         # Cerrar formulario
         self.ventana_actual.destroy()
@@ -123,7 +123,7 @@ class SistemaGestionOrdenes:
         
     def on_volver_menu(self):
         """Callback cuando quieren volver al menú sin guardar"""
-        print("⬅️ Volviendo al menú...")
+        print("⬅ Volviendo al menú...")
         
         # Cerrar formulario
         self.ventana_actual.destroy()
