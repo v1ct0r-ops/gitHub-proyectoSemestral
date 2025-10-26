@@ -1,0 +1,1 @@
+# Este archivo hace que Python reconozca 'database' como un módulo
