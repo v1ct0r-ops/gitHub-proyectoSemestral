@@ -113,7 +113,7 @@ class SistemaGestionOrdenes:
         
     def on_orden_guardada(self):
         """Callback cuando se guarda una orden exitosamente"""
-        print(" Orden guardada exitosamente, volviendo al menú...")
+        print("Orden guardada exitosamente, volviendo al menú...")
         
         # Cerrar formulario
         self.ventana_actual.destroy()
@@ -123,7 +123,7 @@ class SistemaGestionOrdenes:
         
     def on_volver_menu(self):
         """Callback cuando quieren volver al menú sin guardar"""
-        print("⬅ Volviendo al menú...")
+        print("Volviendo al menú...")
         
         # Cerrar formulario
         self.ventana_actual.destroy()
