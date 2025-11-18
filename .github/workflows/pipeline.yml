@@ -1,0 +1,57 @@
+name: Python CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout del repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Configuración de Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # 3️⃣ Instalación de dependencias
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # 4️⃣ Ejecución de tests unitarios
+      - name: Run tests
+        run: |
+          if [ -d tests ]; then
+            pytest tests/
+          else
+            echo "No hay tests definidos, omitiendo."
+          fi
+
+      # 5️⃣ Build / Preparar para despliegue
+      - name: Build project
+        run: |
+          echo "Aquí se puede agregar el build o compilación del proyecto"
+          # Por ejemplo, para PyInstaller:
+          # pyinstaller --onefile src/app.py
+
+      # 6️⃣ Despliegue (opcional, ejemplo Heroku o servidor)
+      - name: Deploy
+        run: |
+          echo "Agrega aquí comandos de despliegue (Heroku, Netlify, servidor propio, etc.)"
+
+      # 7️⃣ Notificación
+      - name: Notify
+        run: |
+          echo "Pipeline completado. Resultado: $GITHUB_WORKFLOW"
