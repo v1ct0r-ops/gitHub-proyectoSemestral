@@ -56,6 +56,36 @@ def crear_tablas():
                 fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        
+        # Crear tabla facturas
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS facturas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                numero_factura TEXT UNIQUE NOT NULL,
+                orden_id INTEGER,
+                cliente TEXT,
+                total REAL NOT NULL,
+                fecha_emision DATETIME DEFAULT CURRENT_TIMESTAMP,
+                estado_despacho TEXT DEFAULT 'pendiente',
+                notas_despacho TEXT,
+                FOREIGN KEY (orden_id) REFERENCES ordenes_compra(id)
+            )
+        ''')
+
+        # Crear tabla detalle_facturas
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS detalle_facturas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                factura_id INTEGER NOT NULL,
+                producto_id INTEGER,
+                producto_nombre TEXT NOT NULL,
+                cantidad INTEGER NOT NULL,
+                precio_unitario REAL NOT NULL,
+                subtotal REAL NOT NULL,
+                FOREIGN KEY (factura_id) REFERENCES facturas(id),
+                FOREIGN KEY (producto_id) REFERENCES productos(id)
+            )
+        ''')
         conexion.commit()
         conexion.close()
 
@@ -129,6 +159,60 @@ def inicializar_base_de_datos():
             conexion.close()
     
     print("Base de datos inicializada")
+
+
+def crear_factura(numero_factura, orden_id, cliente, total, estado_despacho='pendiente', notas_despacho=None):
+    """Crea una factura y devuelve su id"""
+    conexion = conectar()
+    if conexion:
+        try:
+            cursor = conexion.cursor()
+            cursor.execute(
+                "INSERT INTO facturas (numero_factura, orden_id, cliente, total, estado_despacho, notas_despacho) VALUES (?, ?, ?, ?, ?, ?)",
+                (numero_factura, orden_id, cliente, total, estado_despacho, notas_despacho)
+            )
+            conexion.commit()
+            factura_id = cursor.lastrowid
+            return factura_id
+        except Exception as e:
+            print(f"Error al crear factura: {e}")
+        finally:
+            conexion.close()
+    return None
+
+
+def agregar_detalle_factura(factura_id, producto_id, producto_nombre, cantidad, precio_unitario):
+    """Agrega una línea al detalle de una factura"""
+    subtotal = cantidad * precio_unitario
+    conexion = conectar()
+    if conexion:
+        try:
+            cursor = conexion.cursor()
+            cursor.execute(
+                "INSERT INTO detalle_facturas (factura_id, producto_id, producto_nombre, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?, ?)",
+                (factura_id, producto_id, producto_nombre, cantidad, precio_unitario, subtotal)
+            )
+            conexion.commit()
+        except Exception as e:
+            print(f"Error al agregar detalle de factura: {e}")
+        finally:
+            conexion.close()
+
+
+def listar_facturas():
+    """Devuelve una lista de facturas para inspección rápida"""
+    conexion = conectar()
+    if conexion:
+        try:
+            cursor = conexion.cursor()
+            cursor.execute("SELECT id, numero_factura, orden_id, cliente, total, fecha_emision, estado_despacho FROM facturas ORDER BY fecha_emision DESC")
+            filas = cursor.fetchall()
+            return filas
+        except Exception as e:
+            print(f"Error al listar facturas: {e}")
+        finally:
+            conexion.close()
+    return []
 
 # Código de prueba
 if __name__ == "__main__":
