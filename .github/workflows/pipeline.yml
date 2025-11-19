@@ -25,6 +25,9 @@ jobs:
 
       - name: Run tests
         run: |
+          # Ensure the repository root is on PYTHONPATH so tests can import the `webapp` package
+          export PYTHONPATH="${{ github.workspace }}"
+          echo "PYTHONPATH=$PYTHONPATH"
           pytest -q webapp/tests || (echo "Algún test falló" && exit 1)
 
       - name: Build (placeholder)
