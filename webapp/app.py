@@ -8,14 +8,14 @@ def create_app():
     app.secret_key = os.environ.get("FLASK_SECRET", "cambia_esto_en_produccion")
 
     # Inicializar base de datos (si no existe)
-    from models.database import inicializar_base_de_datos
+    from webapp.models.database import inicializar_base_de_datos
     inicializar_base_de_datos()
 
     # Registrar blueprints
-    from controllers.login_controller import bp as login_bp
-    from controllers.orden_controller import bp as orden_bp
-    from controllers.factura_controller import bp as factura_bp
-    from controllers.envio_controller import bp as envio_bp
+    from webapp.controllers.login_controller import bp as login_bp
+    from webapp.controllers.orden_controller import bp as orden_bp
+    from webapp.controllers.factura_controller import bp as factura_bp
+    from webapp.controllers.envio_controller import bp as envio_bp
 
     app.register_blueprint(login_bp)
     app.register_blueprint(orden_bp)

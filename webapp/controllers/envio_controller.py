@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
-from models.envio_model import registrar_envio, listar_envios_por_factura
+from webapp.models.envio_model import registrar_envio, listar_envios_por_factura
 
 bp = Blueprint("envio", __name__, url_prefix="/envio")
 

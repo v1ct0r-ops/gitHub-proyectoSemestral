@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from models.database import get_connection
+from webapp.models.database import get_connection
 import re
 
 

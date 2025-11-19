@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from models.orden_model import crear_orden, listar_ordenes, obtener_orden, listar_productos, eliminar_orden
-from models.factura_model import obtener_factura_por_orden
+from webapp.models.orden_model import crear_orden, listar_ordenes, obtener_orden, listar_productos, eliminar_orden
+from webapp.models.factura_model import obtener_factura_por_orden
 import json
 import uuid
 

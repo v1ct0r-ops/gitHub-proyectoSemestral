@@ -1,5 +1,5 @@
 from datetime import datetime
-from models.database import get_connection
+from webapp.models.database import get_connection
 
 
 def registrar_envio(factura_id, estado, notas=None):

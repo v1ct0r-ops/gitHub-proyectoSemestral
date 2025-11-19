@@ -1,5 +1,5 @@
 from datetime import datetime
-from models.database import get_connection
+from webapp.models.database import get_connection
 
 
 def crear_factura(numero_factura, orden_id, cliente, total, iva, total_con_iva, estado_despacho="pendiente", notas_despacho=None):

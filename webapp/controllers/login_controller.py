@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash
 import hashlib
-from models.database import get_connection
+from webapp.models.database import get_connection
 
 bp = Blueprint("login", __name__, url_prefix="/login")
 

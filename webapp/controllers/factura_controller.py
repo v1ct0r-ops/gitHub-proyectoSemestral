@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
-from utils.iva import calcular_iva
-from models.factura_model import crear_factura, agregar_detalle_factura, obtener_factura, obtener_detalles, obtener_factura_por_orden
-from models.orden_model import obtener_orden
+from webapp.utils.iva import calcular_iva
+from webapp.models.factura_model import crear_factura, agregar_detalle_factura, obtener_factura, obtener_detalles, obtener_factura_por_orden
+from webapp.models.orden_model import obtener_orden
 import uuid
 
-from models.envio_model import listar_envios_por_factura
+from webapp.models.envio_model import listar_envios_por_factura
 
 bp = Blueprint("factura", __name__, url_prefix="/factura")
 
