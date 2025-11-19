@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Órdenes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+  <div class="container">
+    <h2>Órdenes</h2>
+
+    <h4>Nueva orden</h4>
+    {% if productos is not none %}
+    <form method="post" action="{{ url_for('orden.nueva_orden') }}" id="ordenForm">
+      <div class="row mb-2">
+        <div class="col-md-6"><input name="cliente" class="form-control" placeholder="Cliente" required></div>
+        <div class="col-md-6"><input name="telefono" class="form-control" placeholder="Teléfono"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6"><input name="direccion" class="form-control" placeholder="Dirección"></div>
+        <div class="col-md-3"><input name="comuna" class="form-control" placeholder="Comuna"></div>
+        <div class="col-md-3"><input name="region" class="form-control" placeholder="Región"></div>
+      </div>
+
+      <h5>Productos</h5>
+      <table class="table">
+        <thead><tr><th>Producto</th><th>Precio</th><th style="width:120px">Cantidad</th><th>Subtotal</th></tr></thead>
+        <tbody>
+          {% for p in productos %}
+          <tr>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.precio }}</td>
+            <td><input type="number" min="0" value="0" class="form-control qty" name="qty_{{ p.id }}" data-id="{{ p.id }}" data-precio="{{ p.precio }}"></td>
+            <td class="subtotal" id="sub_{{ p.id }}">0</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <strong>Total:</strong> <span id="totalDisplay">0</span>
+        </div>
+        <div>
+          <button class="btn btn-success">Guardar orden</button>
+        </div>
+      </div>
+    </form>
+    {% else %}
+      <p><a class="btn btn-primary" href="{{ url_for('orden.nueva_orden') }}">Crear nueva orden</a></p>
+    {% endif %}
+
+    <h4 class="mt-4">Listado</h4>
+    <table class="table">
+      <thead><tr><th>#</th><th>Cliente</th><th>Total</th><th>Fecha</th><th>Factura</th><th>Acciones</th></tr></thead>
+      <tbody>
+        {% for o in ordenes %}
+        <tr>
+          <td>{{ o.numero_orden }}</td>
+          <td>{{ o.cliente }}</td>
+          <td>{{ o.total|clp }}</td>
+          <td>{{ o.fecha_creacion }}</td>
+          <td>
+            {% if o.factura %}
+              <span class="badge bg-success">Generada</span>
+            {% else %}
+              <span class="badge bg-secondary">Pendiente</span>
+            {% endif %}
+          </td>
+          <td>
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('orden.ver_orden', orden_id=o.id) }}">Ver</a>
+            {% if o.factura %}
+              <a class="btn btn-sm btn-primary ms-1" href="{{ url_for('factura.detalle_factura', factura_id=o.factura.id) }}">Ver factura</a>
+            {% else %}
+              <a class="btn btn-sm btn-success ms-1" href="{{ url_for('factura.crear_factura_view', orden_id=o.id) }}">Generar factura</a>
+            {% endif %}
+            <form method="post" action="{{ url_for('orden.eliminar_orden_view', orden_id=o.id) }}" style="display:inline" onsubmit="return confirm('¿Eliminar esta orden?')">
+              <button type="submit" class="btn btn-sm btn-danger ms-1">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <script>
+    // Calcular subtotales y total en la UI
+    function updateTotals() {
+      let total = 0;
+      document.querySelectorAll('.qty').forEach(function(el){
+        const id = el.dataset.id;
+        const precio = parseFloat(el.dataset.precio) || 0;
+        const qty = parseInt(el.value) || 0;
+        const subtotal = precio * qty;
+        const subEl = document.getElementById('sub_' + id);
+        if (subEl) subEl.textContent = subtotal.toFixed(2);
+        total += subtotal;
+      });
+      document.getElementById('totalDisplay').textContent = total.toFixed(2);
+    }
+
+    document.addEventListener('input', function(e){
+      if (e.target.classList && e.target.classList.contains('qty')) {
+        updateTotals();
+      }
+    });
+
+    // Inicializar
+    updateTotals();
+  </script>
+</body>
+</html>
