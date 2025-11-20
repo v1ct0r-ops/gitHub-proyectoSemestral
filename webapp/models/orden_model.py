@@ -1,4 +1,6 @@
 import json
+import time
+import sqlite3
 from datetime import datetime
 from webapp.models.database import get_connection
 import re
@@ -8,14 +10,52 @@ def crear_orden(numero_orden, cliente, direccion, telefono, comuna, region, prod
     conn = get_connection()
     cur = conn.cursor()
     fecha = datetime.utcnow().isoformat()
-    cur.execute("""
-        INSERT INTO ordenes_compra (numero_orden, cliente, direccion, telefono, comuna, region, productos, total, fecha_creacion)
-        VALUES (?,?,?,?,?,?,?,?,?)
-    """, (numero_orden, cliente, direccion, telefono, comuna, region, json.dumps(productos), total, fecha))
-    conn.commit()
-    orden_id = cur.lastrowid
-    conn.close()
-    return orden_id
+
+    # Inspeccionar columnas reales para construir INSERT compatible
+    cur.execute("PRAGMA table_info(ordenes_compra)")
+    cols = [r[1] for r in cur.fetchall()]
+
+    insert_cols = ['numero_orden', 'cliente', 'direccion', 'telefono', 'comuna', 'region', 'productos']
+    values = [numero_orden, cliente, direccion, telefono, comuna, region, json.dumps(productos)]
+
+    # Compatibilidad legacy: si existe 'precios' (NOT NULL en algunas DBs), rellenarlo
+    if 'precios' in cols:
+        insert_cols.append('precios')
+        values.append(total)
+
+    # Columna 'total' (nueva schema)
+    if 'total' in cols:
+        insert_cols.append('total')
+        values.append(total)
+
+    # Fecha creación si existe
+    if 'fecha_creacion' in cols:
+        insert_cols.append('fecha_creacion')
+        values.append(fecha)
+
+    placeholders = ','.join(['?'] * len(insert_cols))
+    sql = f"INSERT INTO ordenes_compra ({','.join(insert_cols)}) VALUES ({placeholders})"
+
+    # Reintentos en caso de 'database is locked'
+    attempts = 6
+    for attempt in range(attempts):
+        try:
+            cur.execute(sql, tuple(values))
+            conn.commit()
+            orden_id = cur.lastrowid
+            conn.close()
+            return orden_id
+        except sqlite3.OperationalError as e:
+            msg = str(e).lower()
+            if 'locked' in msg and attempt < attempts - 1:
+                time.sleep(0.5 + attempt * 0.2)
+                continue
+            conn.close()
+            raise
+        except sqlite3.IntegrityError:
+            # No reintentar sobre errores de integridad; propagar para debugging
+            conn.close()
+            raise
 
 
 def listar_ordenes():
