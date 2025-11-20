@@ -145,6 +145,28 @@ def inicializar_base_de_datos():
                 FOREIGN KEY(orden_id) REFERENCES ordenes_compra(id)
             )""")
 
+        # Ensure ordenes_compra has 'total' and 'fecha_creacion' (legacy DBs may lack them)
+        if table_exists('ordenes_compra'):
+            if not column_exists('ordenes_compra', 'total'):
+                cur.execute("ALTER TABLE ordenes_compra ADD COLUMN total REAL DEFAULT 0")
+            if not column_exists('ordenes_compra', 'fecha_creacion'):
+                cur.execute("ALTER TABLE ordenes_compra ADD COLUMN fecha_creacion TEXT")
+        else:
+            # create table if missing
+            cur.execute("""
+            CREATE TABLE ordenes_compra (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                numero_orden TEXT UNIQUE NOT NULL,
+                cliente TEXT NOT NULL,
+                direccion TEXT,
+                telefono TEXT,
+                comuna TEXT,
+                region TEXT,
+                productos TEXT,
+                total REAL,
+                fecha_creacion TEXT
+            )""")
+
         # detalle_facturas
         if not table_exists('detalle_facturas'):
             cur.execute("""
